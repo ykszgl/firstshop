@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd  
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop  
+     http://www.springframework.org/schema/aop/spring-aop.xsd 
+    http://www.springframework.org/schema/tx   
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 配置连接池 -->
+	<!--引入外部属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!-- 配置c3p0连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	<!-- Hibernate的相关信息 -->
+	<!-- 配置Hibernate的相关属性 -->
+	<bean id="sessionFactory"
+		class=" org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<!--注入连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 配置Hibernate的属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.formal_sql">true</prop>
+				<prop key="hibernate.connection.autocommit">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<!-- 加载Hibernate的映射文件 -->
+		<property name="mappingResources">
+			<list>
+				<value>zgl/shop/vo/User.hbm.xml</value>
+				<value>zgl/shop/vo/Category.hbm.xml</value>
+				<value>zgl/shop/vo/Product.hbm.xml</value>
+				<value>zgl/shop/vo/CategorySecond.hbm.xml</value>
+				<value>zgl/shop/vo/Order.hbm.xml</value>
+				<value>zgl/shop/vo/OrderItem.hbm.xml</value>
+				<value>zgl/shop/vo/AdminUser.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager ">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 开启注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+	<!-- Action的配置 -->
+	<bean id="indexAction" class="zgl.shop.action.IndexAction" scope="prototype">
+		<property name="categoryService" ref="categoryService" />
+		<property name="productService" ref="productService" />
+	</bean>
+	<bean id="userAction" class="zgl.shop.action.UserAction" scope="prototype">
+		<property name="userService" ref="userService" />
+	</bean>
+	<bean id="productAction" class="zgl.shop.action.ProductAction"
+		scope="prototype">
+		<property name="productService" ref="productService" />
+	</bean>
+
+	<bean id="cartAction" class="zgl.shop.action.CartAction" scope="prototype">
+		<property name="productService" ref="productService" />
+	</bean>
+	
+	<bean id="orderAction" class="zgl.shop.action.OrderAction" scope="prototype">
+		<property name="orderService" ref="orderService" />
+	</bean>
+	<bean id="adminUserAction" class="zgl.shop.action.AdminUserAction" scope="prototype">
+		<property name="adminUserService" ref="adminUserService"/>
+	</bean>
+	<bean id="adminCategoryAction" class="zgl.shop.action.AdminCategoryAction" scope="prototype">
+		<property name="categoryService" ref="categoryService"/>
+	</bean>
+		<bean id="adminCategorySecondAction" class="zgl.shop.action.AdminCategorySecondAction" scope="prototype">
+		<property name="categorySecondService" ref="categorySecondService"/>
+		<property name="categoryService" ref="categoryService"/>
+	</bean>
+	<bean id="adminProductAction" class="zgl.shop.action.AdminProductAction" scope="prototype">
+		<property name="productService" ref="productService"/>
+		<property name="categorySecondService" ref="categorySecondService"/>
+	</bean>
+	<bean id="adminOrderAction" class="zgl.shop.action.AdminOrderAction" scope="prototype">
+		<property name="orderService" ref="orderService"/>
+	</bean>
+	<!-- Service的配置 -->
+	<bean id="userService" class="zgl.shop.service.UserService">
+		<property name="userDao" ref="userDao" />
+	</bean>
+	<bean id="categoryService" class="zgl.shop.service.CategoryService">
+		<property name="categoryDao" ref="categoryDao" />
+	</bean>
+	<bean id="productService" class="zgl.shop.service.ProductService">
+		<property name="productDao" ref="productDao" />
+	</bean>
+		<bean id="orderService" class="zgl.shop.service.OrderService">
+		<property name="orderDao" ref="orderDao" />
+	</bean>
+	<bean id="adminUserService" class="zgl.shop.service.AdminUserService">
+		<property name="adminUserDao" ref="adminUserDao"/>
+	</bean>
+		<bean id="categorySecondService" class="zgl.shop.service.CategorySecondService">
+		<property name="categorySecondDao" ref="categorySecondDao"/>
+	</bean>
+	<!-- Dao的配置 -->
+	<bean id="userDao" class="zgl.shop.dao.UserDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="categoryDao" class="zgl.shop.dao.CategoryDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="productDao" class="zgl.shop.dao.ProductDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+		<bean id="orderDao" class="zgl.shop.dao.OrderDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- 后台登录的Dao -->
+		<bean id="adminUserDao" class="zgl.shop.dao.AdminUserDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<!-- 后台管理二级分类的Dao -->
+		<bean id="categorySecondDao" class="zgl.shop.dao.CategorySecondDao">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<!-- 配置验证码Action -->
+	<bean id="checkImgAction" class="zgl.shop.action.CheckImgAction"
+		scope="prototype">
+
+	</bean>
+</beans>
